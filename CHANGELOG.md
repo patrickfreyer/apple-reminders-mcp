@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-25
+
+### Added
+- **Reminder tags**: `create_reminder`, `update_reminder`, and `create_reminders_batch` now accept a `tags` parameter. Tags are stored as native Apple Reminders `#hashtags` in the notes field, compatible with macOS Ventura+ tag features
+- **`list_reminder_tags`**: New tool to list all unique tags across reminders with usage counts
+- **Tag filtering in `search_reminders`**: New `tag` parameter to filter reminders by tag
+- **`clear_tags`**: `update_reminder` supports `clear_tags: true` to remove all tags from a reminder
+- **Tags in output**: `list_reminders` and `search_reminders` now return a `tags` array and show clean notes (without the tag line)
+
+### Changed
+- Updated MCP Swift SDK dependency to 0.11.0
+- `search_reminders` now accepts tag-only searches (without keywords)
+
+### Summary
+1 new tool (24 → 25 total). Tags feature brings native Apple Reminders hashtag support, enabling categorization and filtering of reminders through `#tags`.
+
+---
+
 ## [1.2.0] - 2026-02-22
 
 ### Added
@@ -207,6 +225,7 @@ Previously, if `calendar_name` was not specified, events/reminders would be save
 
 | Version | Total Tools | New Tools |
 |---------|-------------|-----------|
+| 1.3.0   | 25          | +1 (list_reminder_tags), tags support in create/update/search/batch |
 | 1.0.0   | 24          | Enhancement: flexible dates, fuzzy matching, filter/sort/limit, batch delete with dry_run |
 | 0.9.0   | 24          | +4 (update_calendar, search_reminders, create_reminders_batch, delete_reminders_batch) |
 | 0.6.0   | 20          | Enhancement: calendar_source parameter for disambiguation |

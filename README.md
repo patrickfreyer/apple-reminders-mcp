@@ -17,6 +17,7 @@
 |---------|---------------------|--------------|
 | Calendar Events | Yes | Yes |
 | **Reminders/Tasks** | No | **Yes** |
+| **Reminder #Tags** | No | **Yes** |
 | **Multi-keyword Search** | No | **Yes** |
 | **Duplicate Detection** | No | **Yes** |
 | **Conflict Detection** | No | **Yes** |
@@ -84,7 +85,7 @@ On first use, macOS will prompt for **Calendar** and **Reminders** access - clic
 
 ---
 
-## All 24 Tools
+## All 25 Tools
 
 <details>
 <summary><b>Calendars (4)</b></summary>
@@ -111,16 +112,17 @@ On first use, macOS will prompt for **Calendar** and **Reminders** access - clic
 </details>
 
 <details>
-<summary><b>Reminders (6)</b></summary>
+<summary><b>Reminders (7)</b></summary>
 
 | Tool | Description |
 |------|-------------|
-| `list_reminders` | List reminders with filter/sort/limit (v1.0.0) |
-| `create_reminder` | Create a reminder with due date |
-| `update_reminder` | Update a reminder |
+| `list_reminders` | List reminders with filter/sort/limit, tags extraction (v1.0.0) |
+| `create_reminder` | Create a reminder with due date, tags (v1.3.0) |
+| `update_reminder` | Update a reminder (including tags) (v1.3.0) |
 | `complete_reminder` | Mark as completed/incomplete |
 | `delete_reminder` | Delete a reminder |
-| `search_reminders` | Search reminders by keyword(s) with AND/OR matching (v0.9.0) |
+| `search_reminders` | Search reminders by keyword(s) or tag (v1.3.0) |
+| `list_reminder_tags` | List all unique tags with usage counts (v1.3.0) |
 
 </details>
 
@@ -361,12 +363,12 @@ If ambiguity is detected, the error message will list all available sources.
 
 ## Technical Details
 
-- **Current Version**: v1.2.0
-- **Framework**: [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.10.2
+- **Current Version**: v1.3.0
+- **Framework**: [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.11.0
 - **Calendar API**: EventKit (native macOS framework)
 - **Transport**: stdio
 - **Platform**: macOS 13.0+ (Ventura and later)
-- **Tools**: 24 tools for calendars, events, reminders, and advanced operations
+- **Tools**: 25 tools for calendars, events, reminders, tags, and advanced operations
 
 ---
 
@@ -374,6 +376,7 @@ If ambiguity is detected, the error message will list all available sources.
 
 | Version | Changes |
 |---------|---------|
+| v1.3.0 | **Reminder tags**: `#hashtag` support for `create_reminder`/`update_reminder`/`create_reminders_batch`, tag-based filtering in `search_reminders`, new `list_reminder_tags` tool, tags in list/search output; MCP SDK 0.11.0 |
 | v1.2.0 | **Idempotent writes**: `create_event`, `create_events_batch`, `create_reminder`, `create_reminders_batch`, `create_calendar` now check-before-write to prevent duplicates on retry; responses include `skipped` count |
 | v1.1.0 | **Recurrence + Location**: recurring events/reminders (daily/weekly/monthly/yearly), structured locations with coordinates, location-based reminder triggers (geofence enter/leave), rich recurrence output |
 | v1.0.0 | **DX improvements**: flexible date parsing (4 formats), fuzzy calendar matching, `list_events`/`list_reminders` filter/sort/limit, `delete_events_batch` dry-run + date range mode |

@@ -401,6 +401,11 @@ class CheICalMCPServer {
                             ]),
                             "required": .array([.string("frequency")])
                         ]),
+                        "tags": .object([
+                            "type": .string("array"),
+                            "items": .object(["type": .string("string")]),
+                            "description": .string("Tags for the reminder (stored as #hashtags in Apple Reminders). Example: [\"grocery\", \"urgent\"]")
+                        ]),
                         "location_trigger": .object([
                             "type": .string("object"),
                             "description": .string("Location-based trigger. Reminder fires when entering or leaving the geofence."),
@@ -454,6 +459,15 @@ class CheICalMCPServer {
                         "clear_location_trigger": .object([
                             "type": .string("boolean"),
                             "description": .string("Set to true to remove location trigger from reminder")
+                        ]),
+                        "tags": .object([
+                            "type": .string("array"),
+                            "items": .object(["type": .string("string")]),
+                            "description": .string("Replace existing tags with these new tags (stored as #hashtags). Example: [\"grocery\", \"urgent\"]")
+                        ]),
+                        "clear_tags": .object([
+                            "type": .string("boolean"),
+                            "description": .string("Set to true to remove all tags from reminder")
                         ])
                     ]),
                     "required": .array([.string("reminder_id")])
@@ -487,7 +501,7 @@ class CheICalMCPServer {
             ),
             Tool(
                 name: "search_reminders",
-                description: "Search reminders by keyword(s) in title or notes. Supports single keyword or multiple keywords with AND/OR matching.",
+                description: "Search reminders by keyword(s) in title or notes, or filter by tag. Supports single keyword or multiple keywords with AND/OR matching.",
                 inputSchema: .object([
                     "type": .string("object"),
                     "properties": .object([
@@ -502,6 +516,7 @@ class CheICalMCPServer {
                             "enum": .array([.string("any"), .string("all")]),
                             "description": .string("'any' = OR (matches if ANY keyword found, default), 'all' = AND (matches only if ALL keywords found)")
                         ]),
+                        "tag": .object(["type": .string("string"), "description": .string("Filter by tag (without # prefix). Example: \"grocery\"")]),
                         "calendar_name": .object(["type": .string("string"), "description": .string("Optional reminder list name to filter by")]),
                         "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google'). Required when multiple lists share the same name.")]),
                         "completed": .object(["type": .string("boolean"), "description": .string("Filter: true=completed, false=incomplete, omit=all")])
@@ -770,7 +785,12 @@ class CheICalMCPServer {
                                     "due_date": .object(["type": .string("string"), "description": .string("Due date in ISO8601 format with timezone")]),
                                     "priority": .object(["type": .string("integer"), "description": .string("Priority: 0=none, 1=high, 5=medium, 9=low")]),
                                     "calendar_name": .object(["type": .string("string"), "description": .string("Target reminder list name (required)")]),
-                                    "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google')")])
+                                    "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google')")]),
+                                    "tags": .object([
+                                        "type": .string("array"),
+                                        "items": .object(["type": .string("string")]),
+                                        "description": .string("Tags (stored as #hashtags)")
+                                    ])
                                 ]),
                                 "required": .array([.string("title"), .string("calendar_name")])
                             ])
@@ -795,6 +815,21 @@ class CheICalMCPServer {
                     "required": .array([.string("reminder_ids")])
                 ]),
                 annotations: .init(readOnlyHint: false, destructiveHint: true, openWorldHint: false)
+            ),
+
+            // Tag Tools
+            Tool(
+                name: "list_reminder_tags",
+                description: "List all unique tags used across reminders. Tags are #hashtags stored in reminder notes. Returns tag names and usage counts.",
+                inputSchema: .object([
+                    "type": .string("object"),
+                    "properties": .object([
+                        "calendar_name": .object(["type": .string("string"), "description": .string("Optional: only scan tags from this reminder list")]),
+                        "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google')")]),
+                        "include_completed": .object(["type": .string("boolean"), "description": .string("Include completed reminders (default: false, only scans incomplete)")])
+                    ])
+                ]),
+                annotations: .init(readOnlyHint: true, openWorldHint: false)
             ),
         ]
     }
@@ -884,6 +919,8 @@ class CheICalMCPServer {
             return try await handleCreateRemindersBatch(arguments: arguments)
         case "delete_reminders_batch":
             return try await handleDeleteRemindersBatch(arguments: arguments)
+        case "list_reminder_tags":
+            return try await handleListReminderTags(arguments: arguments)
 
         default:
             throw ToolError.unknownTool(name)
@@ -1219,7 +1256,8 @@ class CheICalMCPServer {
             reminders = Array(reminders.prefix(limit))
         }
 
-        let result = reminders.map { reminder -> [String: Any] in
+        let result = reminders.map { [self] reminder -> [String: Any] in
+            let (cleanNotes, tags) = extractTags(from: reminder.notes)
             var dict: [String: Any] = [
                 "id": reminder.calendarItemIdentifier,
                 "title": reminder.title ?? "",
@@ -1228,7 +1266,8 @@ class CheICalMCPServer {
                 "calendar": reminder.calendar.title,
                 "timezone": TimeZone.current.identifier
             ]
-            if let notes = reminder.notes { dict["notes"] = notes }
+            if let notes = cleanNotes { dict["notes"] = notes }
+            if !tags.isEmpty { dict["tags"] = tags }
             if let dueDate = reminder.dueDateComponents?.date {
                 dict["due_date"] = dateFormatter.string(from: dueDate)
                 dict["due_date_local"] = localDateFormatter.string(from: dueDate)
@@ -1286,7 +1325,10 @@ class CheICalMCPServer {
             throw ToolError.invalidParameter("title is required")
         }
 
-        let notes = arguments["notes"]?.stringValue
+        let userNotes = arguments["notes"]?.stringValue
+        let tags = arguments["tags"]?.arrayValue?.compactMap { $0.stringValue } ?? []
+        let notes = buildNotesWithTags(notes: userNotes, tags: tags)
+
         let dueDate: Date? = try arguments["due_date"]?.stringValue.map { try parseFlexibleDate($0) }
         let priority = arguments["priority"]?.intValue ?? 0
         let calendarName = arguments["calendar_name"]?.stringValue
@@ -1309,7 +1351,11 @@ class CheICalMCPServer {
         if result.isDuplicate {
             return "Skipped (duplicate): \(result.reminder.title ?? title) already exists (ID: \(result.reminder.calendarItemIdentifier))"
         }
-        return "Created reminder: \(result.reminder.title ?? title) (ID: \(result.reminder.calendarItemIdentifier))"
+        var response = "Created reminder: \(result.reminder.title ?? title) (ID: \(result.reminder.calendarItemIdentifier))"
+        if !tags.isEmpty {
+            response += " [tags: \(tags.joined(separator: ", "))]"
+        }
+        return response
     }
 
     private func handleUpdateReminder(arguments: [String: Value]) async throws -> String {
@@ -1318,7 +1364,9 @@ class CheICalMCPServer {
         }
 
         let title = arguments["title"]?.stringValue
-        let notes = arguments["notes"]?.stringValue
+        let userNotes = arguments["notes"]?.stringValue
+        let newTags = arguments["tags"]?.arrayValue?.compactMap { $0.stringValue }
+        let clearTags = arguments["clear_tags"]?.boolValue ?? false
         let dueDate: Date? = try arguments["due_date"]?.stringValue.map { try parseFlexibleDate($0) }
         let priority = arguments["priority"]?.intValue
         let calendarName = arguments["calendar_name"]?.stringValue
@@ -1327,10 +1375,41 @@ class CheICalMCPServer {
         let locationTrigger = try parseLocationTrigger(from: arguments)
         let clearLocationTrigger = arguments["clear_location_trigger"]?.boolValue ?? false
 
+        // Determine final notes:
+        // If user provides notes, use their notes as the base (replacing existing notes content)
+        // If user provides tags or clear_tags, merge tags with existing or new notes
+        var finalNotes: String? = nil
+        let hasNotesChange = userNotes != nil
+        let hasTagChange = newTags != nil || clearTags
+
+        if hasNotesChange || hasTagChange {
+            // Need to read existing reminder to get current notes for tag merging
+            let existingReminder = try await eventKitManager.getReminder(identifier: reminderId)
+            let baseNotes: String?
+            if hasNotesChange {
+                // User is replacing notes content; use their new notes as base
+                baseNotes = userNotes
+            } else {
+                // Keep existing notes content (without old tags)
+                let (cleanExisting, _) = extractTags(from: existingReminder.notes)
+                baseNotes = cleanExisting
+            }
+
+            if clearTags {
+                finalNotes = baseNotes
+            } else if let tags = newTags {
+                finalNotes = buildNotesWithTags(notes: baseNotes, tags: tags)
+            } else if hasNotesChange {
+                // User changed notes but not tags — preserve existing tags
+                let (_, existingTags) = extractTags(from: existingReminder.notes)
+                finalNotes = buildNotesWithTags(notes: baseNotes, tags: existingTags)
+            }
+        }
+
         let reminder = try await eventKitManager.updateReminder(
             identifier: reminderId,
             title: title,
-            notes: notes,
+            notes: finalNotes,
             dueDate: dueDate,
             priority: priority,
             calendarName: calendarName,
@@ -1397,8 +1476,10 @@ class CheICalMCPServer {
             keywords = [keyword]
         }
 
-        if keywords.isEmpty {
-            throw ToolError.invalidParameter("Either 'keyword' or 'keywords' is required")
+        let tagFilter = arguments["tag"]?.stringValue
+
+        if keywords.isEmpty && tagFilter == nil {
+            throw ToolError.invalidParameter("Either 'keyword', 'keywords', or 'tag' is required")
         }
 
         let matchMode = arguments["match_mode"]?.stringValue ?? "any"
@@ -1406,7 +1487,8 @@ class CheICalMCPServer {
         let calendarSource = arguments["calendar_source"]?.stringValue
         let completed = arguments["completed"]?.boolValue
 
-        let reminders = try await eventKitManager.searchReminders(
+        // If only tag filter (no keywords), pass empty to get all reminders, then filter by tag
+        var reminders = try await eventKitManager.searchReminders(
             keywords: keywords,
             matchMode: matchMode,
             calendarName: calendarName,
@@ -1414,7 +1496,17 @@ class CheICalMCPServer {
             completed: completed
         )
 
-        let result = reminders.map { reminder -> [String: Any] in
+        // Apply tag filter
+        if let tagFilter = tagFilter {
+            let normalizedTag = tagFilter.hasPrefix("#") ? String(tagFilter.dropFirst()) : tagFilter
+            reminders = reminders.filter { reminder in
+                let (_, tags) = extractTags(from: reminder.notes)
+                return tags.contains(where: { $0.caseInsensitiveCompare(normalizedTag) == .orderedSame })
+            }
+        }
+
+        let result = reminders.map { [self] reminder -> [String: Any] in
+            let (cleanNotes, tags) = extractTags(from: reminder.notes)
             var dict: [String: Any] = [
                 "id": reminder.calendarItemIdentifier,
                 "title": reminder.title ?? "",
@@ -1423,7 +1515,8 @@ class CheICalMCPServer {
                 "calendar": reminder.calendar.title,
                 "timezone": TimeZone.current.identifier
             ]
-            if let notes = reminder.notes { dict["notes"] = notes }
+            if let notes = cleanNotes { dict["notes"] = notes }
+            if !tags.isEmpty { dict["tags"] = tags }
             if let dueDate = reminder.dueDateComponents?.date {
                 dict["due_date"] = dateFormatter.string(from: dueDate)
                 dict["due_date_local"] = localDateFormatter.string(from: dueDate)
@@ -1455,12 +1548,13 @@ class CheICalMCPServer {
             return dict
         }
 
-        let response: [String: Any] = [
-            "keywords": keywords,
+        var response: [String: Any] = [
             "match_mode": matchMode,
             "result_count": reminders.count,
             "reminders": result
         ]
+        if !keywords.isEmpty { response["keywords"] = keywords }
+        if let tagFilter = tagFilter { response["tag_filter"] = tagFilter }
         return formatJSON(response)
     }
 
@@ -1484,9 +1578,11 @@ class CheICalMCPServer {
 
             do {
                 let batchDueDate: Date? = try reminderDict["due_date"]?.stringValue.map { try parseFlexibleDate($0) }
+                let batchTags = reminderDict["tags"]?.arrayValue?.compactMap { $0.stringValue } ?? []
+                let batchNotes = buildNotesWithTags(notes: reminderDict["notes"]?.stringValue, tags: batchTags)
                 let result = try await eventKitManager.createReminder(
                     title: title,
-                    notes: reminderDict["notes"]?.stringValue,
+                    notes: batchNotes,
                     dueDate: batchDueDate,
                     priority: reminderDict["priority"]?.intValue ?? 0,
                     calendarName: reminderDict["calendar_name"]?.stringValue,
@@ -1550,6 +1646,47 @@ class CheICalMCPServer {
             }
         }
 
+        return formatJSON(response)
+    }
+
+    // MARK: - Tag Handlers
+
+    private func handleListReminderTags(arguments: [String: Value]) async throws -> String {
+        let calendarName = arguments["calendar_name"]?.stringValue
+        let calendarSource = arguments["calendar_source"]?.stringValue
+        let includeCompleted = arguments["include_completed"]?.boolValue ?? false
+
+        let completed: Bool? = includeCompleted ? nil : false
+
+        let reminders = try await eventKitManager.listReminders(
+            completed: completed,
+            calendarName: calendarName,
+            calendarSource: calendarSource
+        )
+
+        // Collect all tags with counts
+        var tagCounts: [String: Int] = [:]
+        for reminder in reminders {
+            let (_, tags) = extractTags(from: reminder.notes)
+            for tag in tags {
+                tagCounts[tag, default: 0] += 1
+            }
+        }
+
+        // Sort by count (descending), then alphabetically
+        let sortedTags = tagCounts.sorted { lhs, rhs in
+            if lhs.value != rhs.value { return lhs.value > rhs.value }
+            return lhs.key < rhs.key
+        }
+
+        let tagList = sortedTags.map { ["tag": $0.key, "count": $0.value] as [String: Any] }
+
+        let response: [String: Any] = [
+            "total_tags": tagCounts.count,
+            "total_reminders_scanned": reminders.count,
+            "include_completed": includeCompleted,
+            "tags": tagList
+        ]
         return formatJSON(response)
     }
 
@@ -2314,6 +2451,99 @@ class CheICalMCPServer {
             dict["days_of_month"] = days.map { $0.intValue }
         }
         return dict
+    }
+
+    // MARK: - Tag Utilities
+
+    /// Extract #tags from notes string, returning (clean notes without tag line, array of tags)
+    private func extractTags(from notes: String?) -> (cleanNotes: String?, tags: [String]) {
+        guard let notes = notes, !notes.isEmpty else {
+            return (nil, [])
+        }
+
+        // Tags are stored as a line of #hashtags (typically the last line)
+        let tagPattern = #"#(\S+)"#
+        let regex = try! NSRegularExpression(pattern: tagPattern)
+
+        // Split into lines and find the tag line (a line where ALL non-whitespace content is #tags)
+        let lines = notes.components(separatedBy: "\n")
+        var tagLine: String?
+        var tagLineIndex: Int?
+
+        // Search from the end for a line that is entirely #tags
+        let tagLinePattern = #"^\s*(#\S+\s*)+$"#
+        let tagLineRegex = try! NSRegularExpression(pattern: tagLinePattern)
+
+        for i in stride(from: lines.count - 1, through: 0, by: -1) {
+            let line = lines[i]
+            if line.trimmingCharacters(in: .whitespaces).isEmpty { continue }
+            let range = NSRange(line.startIndex..., in: line)
+            if tagLineRegex.firstMatch(in: line, range: range) != nil {
+                tagLine = line
+                tagLineIndex = i
+            }
+            break  // Only check the last non-empty line
+        }
+
+        guard let foundTagLine = tagLine, let foundIndex = tagLineIndex else {
+            return (notes, [])
+        }
+
+        // Extract individual tags
+        let range = NSRange(foundTagLine.startIndex..., in: foundTagLine)
+        let matches = regex.matches(in: foundTagLine, range: range)
+        let tags = matches.compactMap { match -> String? in
+            guard let tagRange = Range(match.range(at: 1), in: foundTagLine) else { return nil }
+            return String(foundTagLine[tagRange])
+        }
+
+        if tags.isEmpty {
+            return (notes, [])
+        }
+
+        // Rebuild notes without the tag line
+        var cleanLines = lines
+        cleanLines.remove(at: foundIndex)
+        // Remove trailing empty lines
+        while let last = cleanLines.last, last.trimmingCharacters(in: .whitespaces).isEmpty {
+            cleanLines.removeLast()
+        }
+        let cleanNotes = cleanLines.isEmpty ? nil : cleanLines.joined(separator: "\n")
+
+        return (cleanNotes, tags)
+    }
+
+    /// Build notes string by combining user notes with tags
+    private func buildNotesWithTags(notes: String?, tags: [String]) -> String? {
+        let cleanTags = tags.map { $0.hasPrefix("#") ? String($0.dropFirst()) : $0 }
+            .filter { !$0.isEmpty }
+
+        if cleanTags.isEmpty {
+            return notes
+        }
+
+        let tagLine = cleanTags.map { "#\($0)" }.joined(separator: " ")
+
+        if let notes = notes, !notes.isEmpty {
+            return "\(notes)\n\(tagLine)"
+        } else {
+            return tagLine
+        }
+    }
+
+    /// Merge tags into existing notes: remove old tag line, append new tags
+    private func mergeTagsIntoNotes(existingNotes: String?, newTags: [String]?, clearTags: Bool) -> String? {
+        let (cleanNotes, _) = extractTags(from: existingNotes)
+
+        if clearTags {
+            return cleanNotes
+        }
+
+        guard let tags = newTags, !tags.isEmpty else {
+            return existingNotes  // No tag change requested, keep as-is
+        }
+
+        return buildNotesWithTags(notes: cleanNotes, tags: tags)
     }
 
     private func formatJSON(_ value: Any) -> String {

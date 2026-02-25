@@ -954,6 +954,16 @@ actor EventKitManager {
         return reminder
     }
 
+    func getReminder(identifier: String) async throws -> EKReminder {
+        try await requestReminderAccess()
+
+        guard let reminder = eventStore.calendarItem(withIdentifier: identifier) as? EKReminder else {
+            throw EventKitError.reminderNotFound(identifier: identifier)
+        }
+
+        return reminder
+    }
+
     func completeReminder(identifier: String, completed: Bool = true) async throws -> EKReminder {
         try await requestReminderAccess()
 
@@ -1029,6 +1039,11 @@ actor EventKitManager {
         }
 
         // Filter by keywords in Swift layer (for proper Unicode support)
+        // Empty keywords = return all (useful for tag-only filtering)
+        if keywords.isEmpty {
+            return allReminders
+        }
+
         let lowercasedKeywords = keywords.map { $0.lowercased() }
 
         return allReminders.filter { reminder in

@@ -17,6 +17,7 @@
 |------|----------------|--------------|
 | 行事曆事件 | 有 | 有 |
 | **提醒事項/任務** | 無 | **有** |
+| **提醒事項 #標籤** | 無 | **有** |
 | **多關鍵字搜尋** | 無 | **有** |
 | **重複事件偵測** | 無 | **有** |
 | **衝突檢測** | 無 | **有** |
@@ -84,7 +85,7 @@ swift build -c release
 
 ---
 
-## 全部 24 個工具
+## 全部 25 個工具
 
 <details>
 <summary><b>行事曆 (4)</b></summary>
@@ -111,16 +112,17 @@ swift build -c release
 </details>
 
 <details>
-<summary><b>提醒事項 (6)</b></summary>
+<summary><b>提醒事項 (7)</b></summary>
 
 | 工具 | 說明 |
 |------|------|
-| `list_reminders` | 列出提醒事項，支援篩選/排序/限制（v1.0.0） |
-| `create_reminder` | 建立含到期日的提醒事項 |
-| `update_reminder` | 更新提醒事項 |
+| `list_reminders` | 列出提醒事項，支援篩選/排序/限制、標籤解析（v1.0.0） |
+| `create_reminder` | 建立提醒事項，支援到期日、標籤（v1.3.0） |
+| `update_reminder` | 更新提醒事項（含標籤）（v1.3.0） |
 | `complete_reminder` | 標記為已完成/未完成 |
 | `delete_reminder` | 刪除提醒事項 |
-| `search_reminders` | 多關鍵字搜尋提醒事項，支援 AND/OR 匹配（v0.9.0） |
+| `search_reminders` | 多關鍵字或標籤搜尋提醒事項（v1.3.0） |
+| `list_reminder_tags` | 列出所有已使用的標籤及使用次數（v1.3.0） |
 
 </details>
 
@@ -361,12 +363,12 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 
 ## 技術細節
 
-- **目前版本**：v1.2.0
-- **框架**：[MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.10.2
+- **目前版本**：v1.3.0
+- **框架**：[MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.11.0
 - **行事曆 API**：EventKit（原生 macOS 框架）
 - **傳輸**：stdio
 - **平台**：macOS 13.0+（Ventura 及更新版本）
-- **工具數量**：24 個工具，涵蓋行事曆、事件、提醒事項和進階操作
+- **工具數量**：25 個工具，涵蓋行事曆、事件、提醒事項、標籤和進階操作
 
 ---
 
@@ -374,6 +376,7 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 
 | 版本 | 變更 |
 |------|------|
+| v1.3.0 | **提醒事項標籤**：`create_reminder`/`update_reminder`/`create_reminders_batch` 支援 `#hashtag` 標籤，`search_reminders` 可依標籤過濾，新增 `list_reminder_tags` 工具，列表/搜尋回傳含標籤；MCP SDK 0.11.0 |
 | v1.2.0 | **冪等寫入**：`create_event`、`create_events_batch`、`create_reminder`、`create_reminders_batch`、`create_calendar` 寫入前自動查重，防止 Agent 重試產生重複資料；回傳包含 `skipped` 計數 |
 | v1.1.0 | **循環規則 + 位置**：循環事件/提醒（每日/每週/每月/每年）、含座標結構化位置、基於地理圍欄的位置提醒觸發、豐富的循環規則輸出 |
 | v1.0.0 | **開發體驗改進**：彈性日期解析（4 種格式）、模糊日曆匹配、`list_events`/`list_reminders` 篩選/排序/限制、`delete_events_batch` 預覽模式 + 日期範圍模式 |
