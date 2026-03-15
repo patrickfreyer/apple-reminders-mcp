@@ -363,7 +363,7 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 
 ## 技術細節
 
-- **目前版本**：v1.3.1
+- **目前版本**：v1.4.0
 - **框架**：[MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.11.0
 - **行事曆 API**：EventKit（原生 macOS 框架）
 - **傳輸**：stdio
@@ -376,6 +376,7 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 
 | 版本 | 變更 |
 |------|------|
+| v1.4.0 | **LLM 可靠性**：修正預設搜尋範圍（±2 年取代 distantPast/Future）、`search_events` 回傳 `searched_range` metadata、`create_events_batch` 回傳 `similar_events` 提示、tool description 加入 LLM 使用指引 |
 | v1.3.1 | **文檔修正**：明確說明標籤為 MCP 層級（非 Reminders.app 原生標籤）；Apple 未提供原生標籤的公開 API |
 | v1.3.0 | **提醒事項標籤**（MCP 層級）：`create_reminder`/`update_reminder`/`create_reminders_batch` 支援 `#hashtag` 標籤文字存於備註，`search_reminders` 可依標籤過濾，新增 `list_reminder_tags` 工具；MCP SDK 0.11.0。注意：標籤可透過 MCP 搜尋，但不會成為 Reminders.app 原生標籤（Apple 未提供公開 API） |
 | v1.2.0 | **冪等寫入**：`create_event`、`create_events_batch`、`create_reminder`、`create_reminders_batch`、`create_calendar` 寫入前自動查重，防止 Agent 重試產生重複資料；回傳包含 `skipped` 計數 |

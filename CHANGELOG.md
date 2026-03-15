@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-03-16
+
+### Added
+- **`searched_range` metadata in `search_events` response**: Returns the actual date range searched (`start`, `end`, `is_default_range`), enabling LLM consumers to verify coverage and self-correct when events are not found
+- **`similar_events` hints in `create_events_batch` response**: Returns existing events with similar titles (by word match), helping LLMs reuse correct calendar names and avoid duplicates
+- **`findSimilarEvents` internal method**: New EventKitManager method for title-based fuzzy matching with deduplication
+
+### Changed
+- **Fixed default search range**: `search_events` now defaults to ±2 years instead of `Date.distantPast`/`Date.distantFuture`. Apple's EventKit `predicateForEvents` can return incomplete results with extremely wide ranges, causing past events to be silently missed
+- **Updated tool descriptions with LLM tips**: `search_events` and `create_events_batch` descriptions now include guidance for LLM callers (default range info, `searched_range` field, similar events hints)
+
+### Summary
+Improves `search_events` and `create_events_batch` for LLM reliability. Fixes a subtle EventKit bug where past events were silently missed, adds observability metadata, and provides deduplication hints. 25 tools (unchanged).
+
+---
+
 ## [1.3.1] - 2026-02-26
 
 ### Changed

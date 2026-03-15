@@ -363,7 +363,7 @@ If ambiguity is detected, the error message will list all available sources.
 
 ## Technical Details
 
-- **Current Version**: v1.3.1
+- **Current Version**: v1.4.0
 - **Framework**: [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.11.0
 - **Calendar API**: EventKit (native macOS framework)
 - **Transport**: stdio
@@ -376,6 +376,7 @@ If ambiguity is detected, the error message will list all available sources.
 
 | Version | Changes |
 |---------|---------|
+| v1.4.0 | **LLM reliability**: Fix default search range (±2yr instead of distantPast/Future), `searched_range` metadata in `search_events` response, `similar_events` hints in `create_events_batch`, LLM tips in tool descriptions |
 | v1.3.1 | **Docs fix**: Clarified that tags are MCP-level (not native Reminders.app tags); Apple provides no public API for native tags |
 | v1.3.0 | **Reminder tags** (MCP-level): `#hashtag` text stored in notes for `create_reminder`/`update_reminder`/`create_reminders_batch`, tag-based filtering in `search_reminders`, new `list_reminder_tags` tool; MCP SDK 0.11.0. Note: tags are searchable via MCP but do not appear as native Reminders.app tags (Apple provides no public API for this) |
 | v1.2.0 | **Idempotent writes**: `create_event`, `create_events_batch`, `create_reminder`, `create_reminders_batch`, `create_calendar` now check-before-write to prevent duplicates on retry; responses include `skipped` count |

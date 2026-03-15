@@ -3,7 +3,7 @@ import Foundation
 /// Centralized version management
 enum AppVersion {
     /// Current version - update this when releasing
-    static let current = "1.3.1"
+    static let current = "1.4.0"
 
     /// App name
     static let name = "CheICalMCP"
