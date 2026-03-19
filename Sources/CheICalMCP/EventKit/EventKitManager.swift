@@ -476,6 +476,27 @@ actor EventKitManager {
         markNeedsRefresh()
     }
 
+    /// Delete an entire recurring event series by removing from the earliest occurrence.
+    /// Uses .futureEvents on the master event to delete all occurrences.
+    func deleteEventSeries(identifier: String) async throws {
+        try await requestCalendarAccess()
+
+        guard let event = eventStore.event(withIdentifier: identifier) else {
+            throw EventKitError.eventNotFound(identifier: identifier)
+        }
+
+        // If the event has recurrence rules, it is (or belongs to) a recurring series.
+        // eventStore.event(withIdentifier:) returns the master event for recurring series,
+        // so calling .futureEvents on it deletes the entire series.
+        // If it's a non-recurring event, just delete it normally.
+        if event.hasRecurrenceRules {
+            try eventStore.remove(event, span: .futureEvents)
+        } else {
+            try eventStore.remove(event, span: .thisEvent)
+        }
+        markNeedsRefresh()
+    }
+
     /// Get a single event by identifier
     func getEvent(identifier: String) async throws -> EKEvent {
         try await requestCalendarAccess()
