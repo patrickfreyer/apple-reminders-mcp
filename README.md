@@ -394,7 +394,7 @@ macOS TCC (Transparency, Consent, and Control) grants privacy permissions **per-
 
 ## Technical Details
 
-- **Current Version**: v1.4.0
+- **Current Version**: v1.4.1
 - **Framework**: [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) v0.11.0
 - **Calendar API**: EventKit (native macOS framework)
 - **Transport**: stdio
