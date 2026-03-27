@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-27
+### Fork: AppleRemindersMCP
+- Forked from che-ical-mcp v1.4.1 by Che Cheng
+- Added `due_before` and `due_after` date filtering to `list_reminders` (EventKit-level)
+- Added `due_before` and `due_after` date filtering to `search_reminders` (post-fetch)
+- Rebranded all references to AppleRemindersMCP
+- Updated bundle identifier to com.patrickfreyer.AppleRemindersMCP
+
+---
+
 ## [1.4.1] - 2026-03-25
 
 ### Improved

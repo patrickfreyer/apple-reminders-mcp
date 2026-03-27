@@ -92,4 +92,4 @@ For questions or concerns about privacy, please open an issue on the project's G
 ---
 
 *Last updated: 2026-01-16*
-*Version: 0.8.0*
+*Version: 2.0.0*

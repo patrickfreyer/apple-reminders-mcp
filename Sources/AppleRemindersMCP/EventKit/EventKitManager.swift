@@ -351,7 +351,7 @@ actor EventKitManager {
 
         // Add recurrence rule
         if let rule = recurrenceRule {
-            event.recurrenceRules = [createRecurrenceRule(from: rule)]
+            event.recurrenceRules = [try createRecurrenceRule(from: rule)]
         }
 
         // Set structured location (overrides location text if both provided)
@@ -450,7 +450,7 @@ actor EventKitManager {
         if clearRecurrence {
             event.recurrenceRules = nil
         } else if let rule = recurrenceRule {
-            event.recurrenceRules = [createRecurrenceRule(from: rule)]
+            event.recurrenceRules = [try createRecurrenceRule(from: rule)]
         }
 
         // Update structured location
@@ -937,7 +937,7 @@ actor EventKitManager {
 
         // Add recurrence rule
         if let rule = recurrenceRule {
-            reminder.recurrenceRules = [createRecurrenceRule(from: rule)]
+            reminder.recurrenceRules = [try createRecurrenceRule(from: rule)]
         }
 
         // Add location trigger
@@ -1168,7 +1168,7 @@ actor EventKitManager {
 
     // MARK: - Helpers
 
-    private func createRecurrenceRule(from input: RecurrenceRuleInput) -> EKRecurrenceRule {
+    private func createRecurrenceRule(from input: RecurrenceRuleInput) throws -> EKRecurrenceRule {
         let frequency: EKRecurrenceFrequency
         switch input.frequency {
         case .daily: frequency = .daily
@@ -1179,7 +1179,21 @@ actor EventKitManager {
 
         var daysOfWeek: [EKRecurrenceDayOfWeek]?
         if let days = input.daysOfWeek {
-            daysOfWeek = days.map { EKRecurrenceDayOfWeek(EKWeekday(rawValue: $0)!) }
+            daysOfWeek = try days.map { rawValue in
+                guard (1...7).contains(rawValue),
+                      let weekday = EKWeekday(rawValue: rawValue) else {
+                    throw EventKitError.invalidInput("Invalid day of week value \(rawValue). Must be 1 (Sunday) through 7 (Saturday).")
+                }
+                return EKRecurrenceDayOfWeek(weekday)
+            }
+        }
+
+        if let daysOfMonth = input.daysOfMonth {
+            for day in daysOfMonth {
+                guard (1...31).contains(day) else {
+                    throw EventKitError.invalidInput("Invalid day of month value \(day). Must be 1 through 31.")
+                }
+            }
         }
 
         var end: EKRecurrenceEnd?
@@ -1258,6 +1272,7 @@ enum EventKitError: LocalizedError {
     case reminderNotFound(identifier: String)
     case calendarNameRequired(forType: String)
     case invalidTimeRange(message: String)
+    case invalidInput(String)
 
     var errorDescription: String? {
         switch self {
@@ -1302,6 +1317,8 @@ enum EventKitError: LocalizedError {
             return "calendar_name is required for creating \(type). Use list_calendars to see available options."
         case .invalidTimeRange(let message):
             return "Invalid time range: \(message)"
+        case .invalidInput(let message):
+            return message
         }
     }
 }

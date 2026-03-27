@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "apple-reminders-mcp",
   "display_name": "macOS Calendar & Reminders",
-  "version": "1.4.1",
+  "version": "2.0.0",
   "description": "Native EventKit integration for macOS Calendar and Reminders apps",
   "long_description": "A powerful MCP server providing 25 tools for managing macOS Calendar events and Reminders. Features include flexible date parsing, fuzzy calendar matching, batch operations with dry-run preview, advanced filtering/sorting/limiting, conflict detection, duplicate finding, multi-keyword search, MCP-level #hashtag tags for reminders (searchable via MCP; native Reminders tags not supported by Apple's public API), and support for iCloud, Google, and Exchange calendars. Requires macOS 13.0 or later.",
   "author": {
@@ -36,7 +36,7 @@
     { "name": "create_event", "description": "Create a new calendar event with optional reminders, recurrence, and structured location" },
     { "name": "update_event", "description": "Update an existing calendar event" },
     { "name": "delete_event", "description": "Delete a calendar event" },
-    { "name": "list_reminders", "description": "List reminders from the Reminders app" },
+    { "name": "list_reminders", "description": "List reminders from the Reminders app with optional due_before/due_after date filtering" },
     { "name": "create_reminder", "description": "Create a new reminder with optional due date, recurrence, location trigger, and tags" },
     { "name": "update_reminder", "description": "Update an existing reminder (including tags)" },
     { "name": "complete_reminder", "description": "Mark a reminder as completed or incomplete" },
@@ -50,7 +50,7 @@
     { "name": "delete_events_batch", "description": "Delete multiple events at once" },
     { "name": "find_duplicate_events", "description": "Find duplicate events across calendars" },
     { "name": "update_calendar", "description": "Update a calendar's properties (rename or change color)" },
-    { "name": "search_reminders", "description": "Search reminders by keyword(s) or tag with AND/OR matching" },
+    { "name": "search_reminders", "description": "Search reminders by keyword(s) or tag with AND/OR matching, with optional due_before/due_after date filtering" },
     { "name": "create_reminders_batch", "description": "Create multiple reminders at once (with tags support)" },
     { "name": "delete_reminders_batch", "description": "Delete multiple reminders at once" },
     { "name": "list_reminder_tags", "description": "List all unique tags used across reminders with usage counts" }
