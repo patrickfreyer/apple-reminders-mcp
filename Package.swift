@@ -11,25 +11,25 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "CheICalMCP",
+            name: "AppleRemindersMCP",
             dependencies: [
                 .product(name: "MCP", package: "swift-sdk")
             ],
-            path: "Sources/CheICalMCP",
+            path: "Sources/AppleRemindersMCP",
             exclude: ["Info.plist"],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
-                    "-Xlinker", "Sources/CheICalMCP/Info.plist"
+                    "-Xlinker", "Sources/AppleRemindersMCP/Info.plist"
                 ])
             ]
         ),
         .testTarget(
-            name: "CheICalMCPTests",
-            dependencies: ["CheICalMCP"],
-            path: "Tests/CheICalMCPTests"
+            name: "AppleRemindersMCPTests",
+            dependencies: ["AppleRemindersMCP"],
+            path: "Tests/AppleRemindersMCPTests"
         )
     ]
 )

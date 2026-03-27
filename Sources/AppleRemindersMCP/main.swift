@@ -13,5 +13,5 @@ if CommandLine.arguments.contains("--help") || CommandLine.arguments.contains("-
 }
 
 // Entry point
-let server = try await CheICalMCPServer()
+let server = try await AppleRemindersMCPServer()
 try await server.run()

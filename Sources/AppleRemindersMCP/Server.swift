@@ -4,7 +4,7 @@ import Foundation
 import MCP
 
 /// MCP Server for EventKit integration
-class CheICalMCPServer {
+class AppleRemindersMCPServer {
     private let server: Server
     private let transport: StdioTransport
     private let eventKitManager = EventKitManager.shared

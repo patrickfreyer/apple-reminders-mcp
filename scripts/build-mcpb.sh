@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build script for che-ical-mcp MCPB package
+# Build script for apple-reminders-mcp MCPB package
 # Creates a Universal Binary and packages it for Claude Desktop
 
 set -e
@@ -9,7 +9,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 MCPB_DIR="$PROJECT_DIR/mcpb"
 SERVER_DIR="$MCPB_DIR/server"
 
-echo "=== che-ical-mcp MCPB Build Script ==="
+echo "=== apple-reminders-mcp MCPB Build Script ==="
 echo "Project directory: $PROJECT_DIR"
 echo ""
 
@@ -25,9 +25,9 @@ swift build -c release --arch x86_64
 echo "[3/4] Creating Universal Binary..."
 mkdir -p "$SERVER_DIR"
 
-ARM64_BINARY="$PROJECT_DIR/.build/arm64-apple-macosx/release/CheICalMCP"
-X64_BINARY="$PROJECT_DIR/.build/x86_64-apple-macosx/release/CheICalMCP"
-UNIVERSAL_BINARY="$SERVER_DIR/CheICalMCP"
+ARM64_BINARY="$PROJECT_DIR/.build/arm64-apple-macosx/release/AppleRemindersMCP"
+X64_BINARY="$PROJECT_DIR/.build/x86_64-apple-macosx/release/AppleRemindersMCP"
+UNIVERSAL_BINARY="$SERVER_DIR/AppleRemindersMCP"
 
 if [[ -f "$ARM64_BINARY" && -f "$X64_BINARY" ]]; then
     lipo -create "$ARM64_BINARY" "$X64_BINARY" -output "$UNIVERSAL_BINARY"
@@ -55,7 +55,7 @@ echo "[4/4] Checking MCPB package contents..."
 REQUIRED_FILES=(
     "$MCPB_DIR/manifest.json"
     "$MCPB_DIR/PRIVACY.md"
-    "$SERVER_DIR/CheICalMCP"
+    "$SERVER_DIR/AppleRemindersMCP"
 )
 
 MISSING=0
@@ -89,7 +89,7 @@ if command -v mcpb &> /dev/null; then
     mcpb pack
     echo ""
     echo "=== Build Complete ==="
-    echo "MCPB package: $MCPB_DIR/che-ical-mcp.mcpb"
+    echo "MCPB package: $MCPB_DIR/apple-reminders-mcp.mcpb"
 else
     echo "=== Build Complete (Manual Pack Required) ==="
     echo "mcpb CLI not found. To pack the bundle:"

@@ -1,5 +1,5 @@
 import XCTest
-@testable import CheICalMCP
+@testable import AppleRemindersMCP
 
 /// Tests for tag extraction and building utilities
 /// Tags are stored as #hashtags in reminder notes, compatible with Apple Reminders (macOS Ventura+)

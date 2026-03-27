@@ -1,29 +1,29 @@
 {
   "manifest_version": "0.3",
-  "name": "che-ical-mcp",
+  "name": "apple-reminders-mcp",
   "display_name": "macOS Calendar & Reminders",
   "version": "1.4.1",
   "description": "Native EventKit integration for macOS Calendar and Reminders apps",
   "long_description": "A powerful MCP server providing 25 tools for managing macOS Calendar events and Reminders. Features include flexible date parsing, fuzzy calendar matching, batch operations with dry-run preview, advanced filtering/sorting/limiting, conflict detection, duplicate finding, multi-keyword search, MCP-level #hashtag tags for reminders (searchable via MCP; native Reminders tags not supported by Apple's public API), and support for iCloud, Google, and Exchange calendars. Requires macOS 13.0 or later.",
   "author": {
-    "name": "Che Cheng",
-    "url": "https://github.com/kiki830621"
+    "name": "Patrick Freyer",
+    "url": "https://github.com/patrickfreyer"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kiki830621/che-ical-mcp.git"
+    "url": "https://github.com/patrickfreyer/apple-reminders-mcp.git"
   },
-  "homepage": "https://github.com/kiki830621/che-ical-mcp",
-  "support": "https://github.com/kiki830621/che-ical-mcp/issues",
+  "homepage": "https://github.com/patrickfreyer/apple-reminders-mcp",
+  "support": "https://github.com/patrickfreyer/apple-reminders-mcp/issues",
   "icon": "icon.png",
   "keywords": ["calendar", "reminders", "eventkit", "macos", "tasks", "scheduling", "tags"],
   "license": "MIT",
-  "privacy_policies": ["https://github.com/kiki830621/che-ical-mcp/blob/main/mcpb/PRIVACY.md"],
+  "privacy_policies": ["https://github.com/patrickfreyer/apple-reminders-mcp/blob/main/mcpb/PRIVACY.md"],
   "server": {
     "type": "binary",
-    "entry_point": "server/CheICalMCP",
+    "entry_point": "server/AppleRemindersMCP",
     "mcp_config": {
-      "command": "${__dirname}/server/CheICalMCP",
+      "command": "${__dirname}/server/AppleRemindersMCP",
       "args": [],
       "env": {}
     }

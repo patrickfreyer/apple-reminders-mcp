@@ -3,18 +3,18 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.checheng.CheICalMCP</string>
+    <string>com.patrickfreyer.AppleRemindersMCP</string>
     <key>CFBundleName</key>
-    <string>CheICalMCP</string>
+    <string>AppleRemindersMCP</string>
     <key>CFBundleVersion</key>
     <string>1.4.1</string>
     <key>NSCalendarsFullAccessUsageDescription</key>
-    <string>CheICalMCP needs access to your calendars to manage events and schedules.</string>
+    <string>AppleRemindersMCP needs access to your calendars to manage events and schedules.</string>
     <key>NSRemindersFullAccessUsageDescription</key>
-    <string>CheICalMCP needs access to your reminders to manage tasks.</string>
+    <string>AppleRemindersMCP needs access to your reminders to manage tasks.</string>
     <key>NSCalendarsUsageDescription</key>
-    <string>CheICalMCP needs access to your calendars to manage events and schedules.</string>
+    <string>AppleRemindersMCP needs access to your calendars to manage events and schedules.</string>
     <key>NSRemindersUsageDescription</key>
-    <string>CheICalMCP needs access to your reminders to manage tasks.</string>
+    <string>AppleRemindersMCP needs access to your reminders to manage tasks.</string>
 </dict>
 </plist>

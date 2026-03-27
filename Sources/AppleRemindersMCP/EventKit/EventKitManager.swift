@@ -1266,7 +1266,7 @@ enum EventKitError: LocalizedError {
                 return """
                 \(type) access denied (SSH session detected). \
                 macOS TCC does not carry privacy permissions to SSH sessions. Workarounds:
-                1. Run CheICalMCP once LOCALLY first to trigger the TCC permission dialog
+                1. Run AppleRemindersMCP once LOCALLY first to trigger the TCC permission dialog
                 2. Or grant Full Disk Access to /usr/sbin/sshd: \
                 System Settings → Privacy & Security → Full Disk Access → add sshd
                 3. After either step, restart the SSH session
