@@ -803,7 +803,7 @@ actor EventKitManager {
 
     // MARK: - Reminders
 
-    func listReminders(completed: Bool? = nil, calendarName: String? = nil, calendarSource: String? = nil) async throws -> [EKReminder] {
+    func listReminders(completed: Bool? = nil, calendarName: String? = nil, calendarSource: String? = nil, dueDateStarting: Date? = nil, dueDateEnding: Date? = nil) async throws -> [EKReminder] {
         try await requestReminderAccess()
         refreshIfNeeded()
 
@@ -822,11 +822,18 @@ actor EventKitManager {
                 )
             } else {
                 predicate = eventStore.predicateForIncompleteReminders(
-                    withDueDateStarting: nil,
-                    ending: nil,
+                    withDueDateStarting: dueDateStarting,
+                    ending: dueDateEnding,
                     calendars: calendars
                 )
             }
+        } else if dueDateStarting != nil || dueDateEnding != nil {
+            // Date filtering requested without completion filter — fetch incomplete with date range
+            predicate = eventStore.predicateForIncompleteReminders(
+                withDueDateStarting: dueDateStarting,
+                ending: dueDateEnding,
+                calendars: calendars
+            )
         } else {
             predicate = eventStore.predicateForReminders(in: calendars)
         }

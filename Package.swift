@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "CheICalMCP",
+    name: "AppleRemindersMCP",
     platforms: [
         .macOS(.v13)
     ],

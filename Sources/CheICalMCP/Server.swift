@@ -354,7 +354,9 @@ class CheICalMCPServer {
                             "description": .string("Maximum number of reminders to return")
                         ]),
                         "calendar_name": .object(["type": .string("string"), "description": .string("Optional reminder list name")]),
-                        "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google'). Required when multiple lists share the same name.")])
+                        "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google'). Required when multiple lists share the same name.")]),
+                        "due_after": .object(["type": .string("string"), "description": .string("Only return reminders due after this date (ISO8601 or YYYY-MM-DD). Filters at the EventKit level for efficiency.")]),
+                        "due_before": .object(["type": .string("string"), "description": .string("Only return reminders due before this date (ISO8601 or YYYY-MM-DD). Filters at the EventKit level for efficiency.")])
                     ])
                 ]),
                 annotations: .init(readOnlyHint: true, openWorldHint: false)
@@ -523,7 +525,9 @@ class CheICalMCPServer {
                         "tag": .object(["type": .string("string"), "description": .string("Filter by tag (without # prefix). Example: \"grocery\"")]),
                         "calendar_name": .object(["type": .string("string"), "description": .string("Optional reminder list name to filter by")]),
                         "calendar_source": .object(["type": .string("string"), "description": .string("Calendar source (e.g., 'iCloud', 'Google'). Required when multiple lists share the same name.")]),
-                        "completed": .object(["type": .string("boolean"), "description": .string("Filter: true=completed, false=incomplete, omit=all")])
+                        "completed": .object(["type": .string("boolean"), "description": .string("Filter: true=completed, false=incomplete, omit=all")]),
+                        "due_after": .object(["type": .string("string"), "description": .string("Only return reminders due after this date (ISO8601 or YYYY-MM-DD)")]),
+                        "due_before": .object(["type": .string("string"), "description": .string("Only return reminders due before this date (ISO8601 or YYYY-MM-DD)")])
                     ])
                 ]),
                 annotations: .init(readOnlyHint: true, openWorldHint: false)
@@ -1205,6 +1209,10 @@ class CheICalMCPServer {
         let calendarName = arguments["calendar_name"]?.stringValue
         let calendarSource = arguments["calendar_source"]?.stringValue
 
+        // Parse date range filters
+        let dueDateStarting: Date? = try arguments["due_after"]?.stringValue.map { try parseFlexibleDate($0) }
+        let dueDateEnding: Date? = try arguments["due_before"]?.stringValue.map { try parseFlexibleDate($0) }
+
         // Determine completion filter: 'filter' parameter takes priority over legacy 'completed'
         let completed: Bool?
         if let filterMode = filterMode {
@@ -1220,7 +1228,9 @@ class CheICalMCPServer {
         var reminders = try await eventKitManager.listReminders(
             completed: completed,
             calendarName: calendarName,
-            calendarSource: calendarSource
+            calendarSource: calendarSource,
+            dueDateStarting: dueDateStarting,
+            dueDateEnding: dueDateEnding
         )
 
         let totalFetched = reminders.count
@@ -1496,6 +1506,10 @@ class CheICalMCPServer {
         let calendarSource = arguments["calendar_source"]?.stringValue
         let completed = arguments["completed"]?.boolValue
 
+        // Parse date range filters
+        let dueDateStarting: Date? = try arguments["due_after"]?.stringValue.map { try parseFlexibleDate($0) }
+        let dueDateEnding: Date? = try arguments["due_before"]?.stringValue.map { try parseFlexibleDate($0) }
+
         // If only tag filter (no keywords), pass empty to get all reminders, then filter by tag
         var reminders = try await eventKitManager.searchReminders(
             keywords: keywords,
@@ -1504,6 +1518,20 @@ class CheICalMCPServer {
             calendarSource: calendarSource,
             completed: completed
         )
+
+        // Apply date range filter (post-fetch since searchReminders doesn't support date params)
+        if let startDate = dueDateStarting {
+            reminders = reminders.filter { reminder in
+                guard let dueDate = reminder.dueDateComponents?.date else { return false }
+                return dueDate >= startDate
+            }
+        }
+        if let endDate = dueDateEnding {
+            reminders = reminders.filter { reminder in
+                guard let dueDate = reminder.dueDateComponents?.date else { return false }
+                return dueDate <= endDate
+            }
+        }
 
         // Apply tag filter
         if let tagFilter = tagFilter {
