@@ -1452,7 +1452,9 @@ class AppleRemindersMCPServer {
             completed: completed
         )
 
-        let status = reminder.isCompleted ? "completed" : "incomplete"
+        // Use the requested state rather than re-reading from EKReminder,
+        // which can return stale isCompleted after save
+        let status = completed ? "completed" : "incomplete"
         return "Reminder marked as \(status): \(reminder.title ?? "")"
     }
 
