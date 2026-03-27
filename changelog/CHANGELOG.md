@@ -54,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING**: Rewritten from Python to Swift
-- Claude Desktop config now points to Swift binary `.build/release/CheICalMCP`
+- Claude Desktop config now points to Swift binary `.build/release/AppleRemindersMCP`
 
 ### Technical Notes
 - Uses MCP Swift SDK v0.10.0 (github.com/modelcontextprotocol/swift-sdk)
@@ -66,13 +66,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Fork from [Omar-V2/mcp-ical](https://github.com/Omar-V2/mcp-ical)
-- Renamed project to `che-ical-mcp`
+- Renamed project to `apple-reminders-mcp`
 - Added changelog directory with Keep a Changelog format
 
 ### Changed
 - Updated MCP dependency from `>=1.2.1` to `>=1.25,<2` (latest stable v1.x)
-- Renamed Python module from `mcp_ical` to `che_ical_mcp`
-- Updated CLI command from `mcp-ical` to `che-ical-mcp`
+- Renamed Python module from `mcp_ical` to `apple_reminders_mcp`
+- Updated CLI command from `mcp-ical` to `apple-reminders-mcp`
 
 ### Technical Notes
 - MCP v1.25 supports spec 2025-11-25 features:

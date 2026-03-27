@@ -1,4 +1,4 @@
-# che-ical-mcp Promotion Guide
+# apple-reminders-mcp Promotion Guide
 
 ## 1. MCP Official Servers List PR
 
@@ -11,7 +11,7 @@
 ### Twitter/X Post
 
 ```
-Introducing che-ical-mcp - macOS Calendar & Reminders MCP server
+Introducing apple-reminders-mcp - macOS Calendar & Reminders MCP server
 
 20 tools for complete calendar and task management:
 - Calendar events (CRUD) + Search & Batch ops
@@ -21,7 +21,7 @@ Introducing che-ical-mcp - macOS Calendar & Reminders MCP server
 
 Built natively in Swift with EventKit
 
-https://github.com/kiki830621/che-ical-mcp
+https://github.com/patrickfreyer/apple-reminders-mcp
 
 #Claude #MCP #macOS #Swift #Calendar
 ```
@@ -29,11 +29,11 @@ https://github.com/kiki830621/che-ical-mcp
 ### Twitter/X Thread Version
 
 ```
-1/4 Introducing che-ical-mcp - macOS Calendar & Reminders MCP server
+1/4 Introducing apple-reminders-mcp - macOS Calendar & Reminders MCP server
 
 Unlike other calendar MCPs, this one includes FULL Reminders support!
 
-https://github.com/kiki830621/che-ical-mcp
+https://github.com/patrickfreyer/apple-reminders-mcp
 
 2/4 20 tools available:
 
@@ -74,7 +74,7 @@ Hey everyone!
 
 I've created an MCP server for macOS Calendar and Reminders.
 
-**che-ical-mcp** provides 20 tools covering calendar events, reminders/tasks, plus advanced features like search, batch operations, and conflict detection.
+**apple-reminders-mcp** provides 20 tools covering calendar events, reminders/tasks, plus advanced features like search, batch operations, and conflict detection.
 
 ### What makes it different?
 
@@ -100,7 +100,7 @@ Most calendar MCPs only handle events. This one also provides complete Reminders
 
 ### Links
 
-- GitHub: https://github.com/kiki830621/che-ical-mcp
+- GitHub: https://github.com/patrickfreyer/apple-reminders-mcp
 - Chinese README: README_zh-TW.md
 
 Would love any feedback!
@@ -114,7 +114,7 @@ Would love any feedback!
 ```
 For anyone using Claude AI with macOS, I built an MCP server that provides full access to Calendar and Reminders.
 
-**che-ical-mcp** includes 20 tools:
+**apple-reminders-mcp** includes 20 tools:
 
 Calendar Management:
 - List, create, delete calendars
@@ -132,20 +132,20 @@ Reminders (unique feature!):
 
 Works with iCloud, Google Calendar, Outlook, and any CalDAV source.
 
-GitHub: https://github.com/kiki830621/che-ical-mcp
+GitHub: https://github.com/patrickfreyer/apple-reminders-mcp
 
 Built with Swift and EventKit - happy to answer any questions!
 ```
 
 ### Hacker News (Show HN)
 
-**Title**: Show HN: che-ical-mcp – macOS Calendar and Reminders MCP server in Swift
+**Title**: Show HN: apple-reminders-mcp – macOS Calendar and Reminders MCP server in Swift
 
 **Body**:
 ```
 I built an MCP (Model Context Protocol) server for macOS Calendar and Reminders with 20 tools.
 
-GitHub: https://github.com/kiki830621/che-ical-mcp
+GitHub: https://github.com/patrickfreyer/apple-reminders-mcp
 
 Key differentiator: Full Reminders support (most calendar MCPs only handle events)
 

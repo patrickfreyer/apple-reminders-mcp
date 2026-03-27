@@ -1,4 +1,4 @@
-# 計劃：che-ical-mcp 功能擴充
+# 計劃：apple-reminders-mcp 功能擴充
 
 > **狀態**: ✅ 已完成 (v1.0.0)
 > - v0.3.0-v0.9.0: 核心功能完成（24 個工具）
@@ -7,7 +7,7 @@
 
 ## 目標
 
-為 che-ical-mcp 添加 5 個新功能：
+為 apple-reminders-mcp 添加 5 個新功能：
 1. 時區顯示 - 返回本地時間而非 UTC
 2. 搜尋/模糊查詢 - 按關鍵字搜尋事件
 3. 快速時間範圍 - today, this_week, next_7_days 捷徑
@@ -19,7 +19,7 @@
 ## 現有架構
 
 ```
-Sources/CheICalMCP/
+Sources/AppleRemindersMCP/
 ├── main.swift              # 進入點
 ├── Server.swift            # MCP 工具定義 (602 行)
 └── EventKit/
@@ -260,12 +260,12 @@ func checkConflicts(startDate: Date, endDate: Date, calendar: EKCalendar?, exclu
 
 ```bash
 # 編譯
-cd /Users/che/Library/CloudStorage/Dropbox/che_workspace/projects/mcp/che-ical-mcp
+cd /Users/che/Library/CloudStorage/Dropbox/che_workspace/projects/mcp/apple-reminders-mcp
 swift build -c release
 
 # 測試時區顯示
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}
-{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_events","arguments":{"start_date":"2026-01-14T00:00:00Z","end_date":"2026-01-15T00:00:00Z"}}}' | .build/release/CheICalMCP
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_events","arguments":{"start_date":"2026-01-14T00:00:00Z","end_date":"2026-01-15T00:00:00Z"}}}' | .build/release/AppleRemindersMCP
 
 # 測試搜尋
 {"name":"search_events","arguments":{"keyword":"尾牙"}}

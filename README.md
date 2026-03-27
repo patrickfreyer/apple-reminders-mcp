@@ -1,4 +1,4 @@
-# che-ical-mcp
+# apple-reminders-mcp
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue)](https://www.apple.com/macos/)
@@ -11,9 +11,9 @@
 
 ---
 
-## Why che-ical-mcp?
+## Why apple-reminders-mcp?
 
-| Feature | Other Calendar MCPs | che-ical-mcp |
+| Feature | Other Calendar MCPs | apple-reminders-mcp |
 |---------|---------------------|--------------|
 | Calendar Events | Yes | Yes |
 | **Reminders/Tasks** | No | **Yes** |
@@ -38,7 +38,7 @@
 
 #### Option A: MCPB One-Click Install (Recommended)
 
-Download the latest `.mcpb` file from [Releases](https://github.com/kiki830621/che-ical-mcp/releases) and double-click to install.
+Download the latest `.mcpb` file from [Releases](https://github.com/patrickfreyer/apple-reminders-mcp/releases) and double-click to install.
 
 #### Option B: Manual Configuration
 
@@ -47,8 +47,8 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "che-ical-mcp": {
-      "command": "/usr/local/bin/che-ical-mcp"
+    "apple-reminders-mcp": {
+      "command": "/usr/local/bin/apple-reminders-mcp"
     }
   }
 }
@@ -61,10 +61,10 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 The plugin includes slash commands (`/today`, `/week`, `/quick-event`, `/remind`), skills, and **a PreToolUse hook that automatically verifies day-of-week** when creating or updating events — preventing date/weekday mismatch errors.
 
 ```bash
-claude plugin add --marketplace psychquant-claude-plugins che-ical-mcp
+claude plugin add --marketplace psychquant-claude-plugins apple-reminders-mcp
 ```
 
-> **Note:** The plugin wraps the MCP binary with auto-download. If the binary is not found at `~/bin/CheICalMCP`, it will be downloaded from GitHub Releases on first use.
+> **Note:** The plugin wraps the MCP binary with auto-download. If the binary is not found at `~/bin/AppleRemindersMCP`, it will be downloaded from GitHub Releases on first use.
 
 #### Option B: Install as standalone MCP
 
@@ -75,14 +75,14 @@ If you only need the MCP server without plugin features:
 mkdir -p ~/bin
 
 # Download the latest release
-curl -L https://github.com/kiki830621/che-ical-mcp/releases/latest/download/CheICalMCP -o ~/bin/CheICalMCP
-chmod +x ~/bin/CheICalMCP
+curl -L https://github.com/patrickfreyer/apple-reminders-mcp/releases/latest/download/AppleRemindersMCP -o ~/bin/AppleRemindersMCP
+chmod +x ~/bin/AppleRemindersMCP
 
 # Add to Claude Code
 # --scope user    : available across all projects (stored in ~/.claude.json)
 # --transport stdio: local binary execution via stdin/stdout
 # --              : separator between claude options and the command
-claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
+claude mcp add --scope user --transport stdio apple-reminders-mcp -- ~/bin/AppleRemindersMCP
 ```
 
 > **💡 Tip:** Always install the binary to a local directory like `~/bin/`. Avoid placing it in cloud-synced folders (Dropbox, iCloud, OneDrive) as file sync operations can cause MCP connection timeouts.
@@ -90,8 +90,8 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 ### Build from Source (Optional)
 
 ```bash
-git clone https://github.com/kiki830621/che-ical-mcp.git
-cd che-ical-mcp
+git clone https://github.com/patrickfreyer/apple-reminders-mcp.git
+cd apple-reminders-mcp
 swift build -c release
 ```
 
@@ -171,7 +171,7 @@ On first use, macOS will prompt for **Calendar** and **Reminders** access - clic
 
 #### Method 1: MCPB One-Click Install (Recommended)
 
-1. Download `che-ical-mcp.mcpb` from [Releases](https://github.com/kiki830621/che-ical-mcp/releases)
+1. Download `apple-reminders-mcp.mcpb` from [Releases](https://github.com/patrickfreyer/apple-reminders-mcp/releases)
 2. Double-click the `.mcpb` file to install
 3. Restart Claude Desktop
 
@@ -179,16 +179,16 @@ On first use, macOS will prompt for **Calendar** and **Reminders** access - clic
 
 1. Download the binary:
    ```bash
-   curl -L https://github.com/kiki830621/che-ical-mcp/releases/latest/download/CheICalMCP -o /usr/local/bin/che-ical-mcp
-   chmod +x /usr/local/bin/che-ical-mcp
+   curl -L https://github.com/patrickfreyer/apple-reminders-mcp/releases/latest/download/AppleRemindersMCP -o /usr/local/bin/apple-reminders-mcp
+   chmod +x /usr/local/bin/apple-reminders-mcp
    ```
 
 2. Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
    ```json
    {
      "mcpServers": {
-       "che-ical-mcp": {
-         "command": "/usr/local/bin/che-ical-mcp"
+       "apple-reminders-mcp": {
+         "command": "/usr/local/bin/apple-reminders-mcp"
        }
      }
    }
@@ -203,23 +203,23 @@ On first use, macOS will prompt for **Calendar** and **Reminders** access - clic
 mkdir -p ~/bin
 
 # Download the binary
-curl -L https://github.com/kiki830621/che-ical-mcp/releases/latest/download/CheICalMCP -o ~/bin/CheICalMCP
-chmod +x ~/bin/CheICalMCP
+curl -L https://github.com/patrickfreyer/apple-reminders-mcp/releases/latest/download/AppleRemindersMCP -o ~/bin/AppleRemindersMCP
+chmod +x ~/bin/AppleRemindersMCP
 
 # Register with Claude Code (user scope = available in all projects)
-claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
+claude mcp add --scope user --transport stdio apple-reminders-mcp -- ~/bin/AppleRemindersMCP
 ```
 
 ### Build from Source (Optional)
 
 ```bash
-git clone https://github.com/kiki830621/che-ical-mcp.git
-cd che-ical-mcp
+git clone https://github.com/patrickfreyer/apple-reminders-mcp.git
+cd apple-reminders-mcp
 swift build -c release
 
 # Copy to ~/bin and register
-cp .build/release/CheICalMCP ~/bin/
-claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
+cp .build/release/AppleRemindersMCP ~/bin/
+claude mcp add --scope user --transport stdio apple-reminders-mcp -- ~/bin/AppleRemindersMCP
 ```
 
 ### Grant Permissions
@@ -379,9 +379,9 @@ If ambiguity is detected, the error message will list all available sources.
 macOS TCC (Transparency, Consent, and Control) grants privacy permissions **per-application**. SSH sessions run under `sshd`, which is a different security context — so permissions granted to Terminal or Claude Code locally do **not** carry over to SSH.
 
 **Workaround A — Run locally first (recommended):**
-1. Run `CheICalMCP` once on the target Mac **locally** (not over SSH)
+1. Run `AppleRemindersMCP` once on the target Mac **locally** (not over SSH)
 2. Grant Calendar and Reminders access when the TCC dialog appears
-3. SSH sessions should then inherit the grant for the `CheICalMCP` binary
+3. SSH sessions should then inherit the grant for the `AppleRemindersMCP` binary
 
 **Workaround B — Grant Full Disk Access to sshd:**
 1. Open **System Settings → Privacy & Security → Full Disk Access**
@@ -441,6 +441,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Author
 
-Created by **Che Cheng** ([@kiki830621](https://github.com/kiki830621))
+Created by **Che Cheng** ([@patrickfreyer](https://github.com/patrickfreyer))
 
 If you find this useful, please consider giving it a star!

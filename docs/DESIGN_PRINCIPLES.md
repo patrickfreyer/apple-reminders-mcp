@@ -1,6 +1,6 @@
-ㄋ# che-ical-mcp Design Principles
+ㄋ# apple-reminders-mcp Design Principles
 
-This document outlines the design principles that guide the development of che-ical-mcp. These principles are adapted from the NSQL project's foundational rules.
+This document outlines the design principles that guide the development of apple-reminders-mcp. These principles are adapted from the NSQL project's foundational rules.
 
 ---
 
@@ -10,7 +10,7 @@ This document outlines the design principles that guide the development of che-i
 
 **Operations should attempt to succeed with minimal required information.** Additional parameters for disambiguation should only be required when actual ambiguity exists, not preemptively.
 
-### Implementation in che-ical-mcp
+### Implementation in apple-reminders-mcp
 
 The `calendar_source` parameter exemplifies this principle:
 
@@ -220,7 +220,7 @@ For a `create_event` call with ambiguous calendar:
 
 ## Summary
 
-| Principle | Application in che-ical-mcp |
+| Principle | Application in apple-reminders-mcp |
 |-----------|----------------------------|
 | Try First, Disambiguate Later | `calendar_source` is optional, only required when ambiguous |
 | Reference Resolution | Clear error messages list all available options |

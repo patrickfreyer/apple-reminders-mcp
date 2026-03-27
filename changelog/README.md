@@ -1,6 +1,6 @@
 # Changelog Directory
 
-This directory contains the changelog for the `che-ical-mcp` project.
+This directory contains the changelog for the `apple-reminders-mcp` project.
 
 ## Format
 

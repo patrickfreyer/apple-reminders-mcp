@@ -1,8 +1,8 @@
-# Privacy Policy - che-ical-mcp
+# Privacy Policy - apple-reminders-mcp
 
 ## Overview
 
-che-ical-mcp is a local MCP (Model Context Protocol) server that provides calendar and reminder management capabilities through macOS EventKit. This document explains how your data is handled.
+apple-reminders-mcp is a local MCP (Model Context Protocol) server that provides calendar and reminder management capabilities through macOS EventKit. This document explains how your data is handled.
 
 ## Data Access
 
@@ -25,14 +25,14 @@ This MCP server accesses the following data on your Mac:
 
 **No data is transmitted** to external services.
 
-- che-ical-mcp operates entirely offline
+- apple-reminders-mcp operates entirely offline
 - All communication happens locally via MCP protocol (stdin/stdout)
 - No network connections are made by this server
 - No analytics, telemetry, or usage tracking
 
 ## Required Permissions
 
-To function, che-ical-mcp requires the following macOS permissions:
+To function, apple-reminders-mcp requires the following macOS permissions:
 
 ### Calendar Access
 - **Purpose**: Read and modify calendar events
@@ -75,7 +75,7 @@ This server does **not** connect to any third-party services:
 
 ## Open Source
 
-che-ical-mcp is open source software licensed under the MIT License. You can review the source code to verify these privacy practices:
+apple-reminders-mcp is open source software licensed under the MIT License. You can review the source code to verify these privacy practices:
 
 - All code is available for inspection
 - No hidden functionality

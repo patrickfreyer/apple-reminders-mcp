@@ -6,11 +6,11 @@ Last updated: 2026-02-06 (v1.1.0)
 
 ## Overview
 
-This document compares che-ical-mcp against all known macOS Calendar/Reminders MCP servers. Source code for each competitor is available in `references/` (gitignored, local only).
+This document compares apple-reminders-mcp against all known macOS Calendar/Reminders MCP servers. Source code for each competitor is available in `references/` (gitignored, local only).
 
 | Project | Stars | Language | Architecture | Tools |
 |---------|-------|----------|-------------|-------|
-| **che-ical-mcp** | new | Swift | Pure EventKit | **24** |
+| **apple-reminders-mcp** | new | Swift | Pure EventKit | **24** |
 | [apple-mcp](https://github.com/supermemoryai/apple-mcp) | 3k+ | TypeScript + AppleScript | AppleScript bridge | ~10 |
 | [iMCP](https://github.com/mattt/iMCP) | 1.1k | Swift | App + CLI (Bonjour) | 6 |
 | [mcp-ical](https://github.com/Omar-V2/mcp-ical) | 258 | Python + PyObjC | PyObjC bridge | 4 |
@@ -22,7 +22,7 @@ This document compares che-ical-mcp against all known macOS Calendar/Reminders M
 
 ### Core Operations
 
-| Feature | che-ical-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
+| Feature | apple-reminders-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
 |---------|:---:|:---:|:---:|:---:|:---:|
 | List calendars | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Create calendar | ✅ | - | - | - | - |
@@ -44,7 +44,7 @@ This document compares che-ical-mcp against all known macOS Calendar/Reminders M
 
 ### Advanced Features
 
-| Feature | che-ical-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
+| Feature | apple-reminders-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
 |---------|:---:|:---:|:---:|:---:|:---:|
 | Batch create events | ✅ | - | - | - | - |
 | Batch create reminders | ✅ | - | - | - | - |
@@ -68,7 +68,7 @@ This document compares che-ical-mcp against all known macOS Calendar/Reminders M
 
 ### Date & i18n
 
-| Feature | che-ical-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
+| Feature | apple-reminders-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
 |---------|:---:|:---:|:---:|:---:|:---:|
 | ISO 8601 | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Date only (`2026-02-06`) | ✅ | - | ✅ | - | ✅ |
@@ -82,7 +82,7 @@ This document compares che-ical-mcp against all known macOS Calendar/Reminders M
 
 ### Architecture & Performance
 
-| Aspect | che-ical-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
+| Aspect | apple-reminders-mcp | apple-mcp | iMCP | mcp-ical | apple-events |
 |--------|:---:|:---:|:---:|:---:|:---:|
 | EventKit access | Direct | AppleScript | Direct | PyObjC | subprocess |
 | Query latency | **ms** | 10-30s | **ms** | ~100ms | 50-100ms |
@@ -176,7 +176,7 @@ This document compares che-ical-mcp against all known macOS Calendar/Reminders M
 
 ## Competitive Advantages Summary
 
-### che-ical-mcp's Unique Strengths
+### apple-reminders-mcp's Unique Strengths
 
 1. **24 tools** — nearly 2x the closest competitor (13)
 2. **Pure Swift + direct EventKit** — millisecond queries, no bridge overhead

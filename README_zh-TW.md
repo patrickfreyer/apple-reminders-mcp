@@ -1,4 +1,4 @@
-# che-ical-mcp
+# apple-reminders-mcp
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue)](https://www.apple.com/macos/)
@@ -11,9 +11,9 @@
 
 ---
 
-## 為什麼選擇 che-ical-mcp？
+## 為什麼選擇 apple-reminders-mcp？
 
-| 功能 | 其他行事曆 MCP | che-ical-mcp |
+| 功能 | 其他行事曆 MCP | apple-reminders-mcp |
 |------|----------------|--------------|
 | 行事曆事件 | 有 | 有 |
 | **提醒事項/任務** | 無 | **有** |
@@ -38,7 +38,7 @@
 
 #### 方式 A：MCPB 一鍵安裝（推薦）
 
-從 [Releases](https://github.com/kiki830621/che-ical-mcp/releases) 下載最新的 `.mcpb` 檔案，雙擊即可安裝。
+從 [Releases](https://github.com/patrickfreyer/apple-reminders-mcp/releases) 下載最新的 `.mcpb` 檔案，雙擊即可安裝。
 
 #### 方式 B：手動設定
 
@@ -47,8 +47,8 @@
 ```json
 {
   "mcpServers": {
-    "che-ical-mcp": {
-      "command": "/usr/local/bin/che-ical-mcp"
+    "apple-reminders-mcp": {
+      "command": "/usr/local/bin/apple-reminders-mcp"
     }
   }
 }
@@ -61,10 +61,10 @@
 Plugin 包含快捷指令（`/today`、`/week`、`/quick-event`、`/remind`）、skills，以及**建立/修改事件時自動驗證星期的 PreToolUse hook** — 防止日期與星期不符的錯誤。
 
 ```bash
-claude plugin add --marketplace psychquant-claude-plugins che-ical-mcp
+claude plugin add --marketplace psychquant-claude-plugins apple-reminders-mcp
 ```
 
-> **備註：** Plugin 內建自動下載功能。如果 `~/bin/CheICalMCP` 不存在，首次使用時會自動從 GitHub Releases 下載。
+> **備註：** Plugin 內建自動下載功能。如果 `~/bin/AppleRemindersMCP` 不存在，首次使用時會自動從 GitHub Releases 下載。
 
 #### 方式 B：僅安裝 MCP Server
 
@@ -75,14 +75,14 @@ claude plugin add --marketplace psychquant-claude-plugins che-ical-mcp
 mkdir -p ~/bin
 
 # 下載最新版本
-curl -L https://github.com/kiki830621/che-ical-mcp/releases/latest/download/CheICalMCP -o ~/bin/CheICalMCP
-chmod +x ~/bin/CheICalMCP
+curl -L https://github.com/patrickfreyer/apple-reminders-mcp/releases/latest/download/AppleRemindersMCP -o ~/bin/AppleRemindersMCP
+chmod +x ~/bin/AppleRemindersMCP
 
 # 加入 Claude Code
 # --scope user    : 跨所有專案可用（存在 ~/.claude.json）
 # --transport stdio: 本地 binary 執行，透過 stdin/stdout
 # --              : 分隔 claude 選項和實際執行的命令
-claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
+claude mcp add --scope user --transport stdio apple-reminders-mcp -- ~/bin/AppleRemindersMCP
 ```
 
 > **💡 提示：** 請將 binary 安裝到本機目錄如 `~/bin/`。避免放在雲端同步資料夾（Dropbox、iCloud、OneDrive），否則檔案同步可能造成 MCP 連線逾時。
@@ -90,8 +90,8 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 ### 從原始碼編譯（可選）
 
 ```bash
-git clone https://github.com/kiki830621/che-ical-mcp.git
-cd che-ical-mcp
+git clone https://github.com/patrickfreyer/apple-reminders-mcp.git
+cd apple-reminders-mcp
 swift build -c release
 ```
 
@@ -171,7 +171,7 @@ swift build -c release
 
 #### 方法 1：MCPB 一鍵安裝（推薦）
 
-1. 從 [Releases](https://github.com/kiki830621/che-ical-mcp/releases) 下載 `che-ical-mcp.mcpb`
+1. 從 [Releases](https://github.com/patrickfreyer/apple-reminders-mcp/releases) 下載 `apple-reminders-mcp.mcpb`
 2. 雙擊 `.mcpb` 檔案安裝
 3. 重新啟動 Claude Desktop
 
@@ -179,16 +179,16 @@ swift build -c release
 
 1. 下載執行檔：
    ```bash
-   curl -L https://github.com/kiki830621/che-ical-mcp/releases/latest/download/CheICalMCP -o /usr/local/bin/che-ical-mcp
-   chmod +x /usr/local/bin/che-ical-mcp
+   curl -L https://github.com/patrickfreyer/apple-reminders-mcp/releases/latest/download/AppleRemindersMCP -o /usr/local/bin/apple-reminders-mcp
+   chmod +x /usr/local/bin/apple-reminders-mcp
    ```
 
 2. 編輯 `~/Library/Application Support/Claude/claude_desktop_config.json`：
    ```json
    {
      "mcpServers": {
-       "che-ical-mcp": {
-         "command": "/usr/local/bin/che-ical-mcp"
+       "apple-reminders-mcp": {
+         "command": "/usr/local/bin/apple-reminders-mcp"
        }
      }
    }
@@ -203,23 +203,23 @@ swift build -c release
 mkdir -p ~/bin
 
 # 下載執行檔
-curl -L https://github.com/kiki830621/che-ical-mcp/releases/latest/download/CheICalMCP -o ~/bin/CheICalMCP
-chmod +x ~/bin/CheICalMCP
+curl -L https://github.com/patrickfreyer/apple-reminders-mcp/releases/latest/download/AppleRemindersMCP -o ~/bin/AppleRemindersMCP
+chmod +x ~/bin/AppleRemindersMCP
 
 # 註冊到 Claude Code（user scope = 所有專案都可使用）
-claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
+claude mcp add --scope user --transport stdio apple-reminders-mcp -- ~/bin/AppleRemindersMCP
 ```
 
 ### 從原始碼編譯（可選）
 
 ```bash
-git clone https://github.com/kiki830621/che-ical-mcp.git
-cd che-ical-mcp
+git clone https://github.com/patrickfreyer/apple-reminders-mcp.git
+cd apple-reminders-mcp
 swift build -c release
 
 # 複製到 ~/bin 並註冊
-cp .build/release/CheICalMCP ~/bin/
-claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
+cp .build/release/AppleRemindersMCP ~/bin/
+claude mcp add --scope user --transport stdio apple-reminders-mcp -- ~/bin/AppleRemindersMCP
 ```
 
 ### 授予權限
@@ -379,7 +379,7 @@ claude mcp add --scope user --transport stdio che-ical-mcp -- ~/bin/CheICalMCP
 macOS TCC（透明度、同意與控制）的隱私權限是**依應用程式**授予的。SSH session 跑在 `sshd` 底下，是不同的安全環境 — 因此在本機授予 Terminal 或 Claude Code 的權限**不會**延伸到 SSH。
 
 **方法 A — 先在本機執行一次（建議）：**
-1. 在目標 Mac 上**本機**（非 SSH）執行一次 `CheICalMCP`
+1. 在目標 Mac 上**本機**（非 SSH）執行一次 `AppleRemindersMCP`
 2. TCC 對話框出現時授予行事曆和提醒事項存取權限
 3. 之後 SSH session 應能沿用該 binary 的授權
 
@@ -441,6 +441,6 @@ MIT License - 詳見 [LICENSE](LICENSE)。
 
 ## 作者
 
-由 **鄭澈** ([@kiki830621](https://github.com/kiki830621)) 建立
+由 **鄭澈** ([@patrickfreyer](https://github.com/patrickfreyer)) 建立
 
 如果覺得有用，請給個 Star 支持一下！

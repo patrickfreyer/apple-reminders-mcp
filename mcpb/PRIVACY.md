@@ -1,10 +1,10 @@
-# Privacy Policy for che-ical-mcp
+# Privacy Policy for apple-reminders-mcp
 
 **Last Updated: January 14, 2026**
 
 ## Overview
 
-che-ical-mcp is a local MCP (Model Context Protocol) server that provides Claude with access to your macOS Calendar and Reminders apps. This extension operates entirely on your local machine and does not transmit any data to external servers.
+apple-reminders-mcp is a local MCP (Model Context Protocol) server that provides Claude with access to your macOS Calendar and Reminders apps. This extension operates entirely on your local machine and does not transmit any data to external servers.
 
 ## Data Access
 
@@ -69,7 +69,7 @@ This extension does not have direct access to these services' servers; it only a
 ## Open Source
 
 This extension is open source. You can review the complete source code at:
-https://github.com/kiki830621/che-ical-mcp
+https://github.com/patrickfreyer/apple-reminders-mcp
 
 ## Platform Limitation
 
@@ -78,8 +78,8 @@ This extension is **macOS only** because it uses Apple's EventKit framework, whi
 ## Contact
 
 For privacy concerns or questions, please:
-- Open an issue on [GitHub](https://github.com/kiki830621/che-ical-mcp/issues)
-- Contact the developer: [@kiki830621](https://github.com/kiki830621)
+- Open an issue on [GitHub](https://github.com/patrickfreyer/apple-reminders-mcp/issues)
+- Contact the developer: [@patrickfreyer](https://github.com/patrickfreyer)
 
 ## Changes to This Policy
 
