@@ -921,10 +921,12 @@ actor EventKitManager {
         reminder.calendar = calendar
 
         if let due = dueDate {
-            reminder.dueDateComponents = Calendar.current.dateComponents(
+            let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute],
                 from: due
             )
+            reminder.dueDateComponents = components
+            reminder.startDateComponents = components
         }
 
         // Add alarms
@@ -979,10 +981,12 @@ actor EventKitManager {
         if let p = priority { reminder.priority = p }
 
         if let due = dueDate {
-            reminder.dueDateComponents = Calendar.current.dateComponents(
+            let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute],
                 from: due
             )
+            reminder.dueDateComponents = components
+            reminder.startDateComponents = components
         }
 
         if let name = calendarName {
