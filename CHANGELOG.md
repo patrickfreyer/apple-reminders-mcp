@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-05-30
+
+### Fixed
+- **Calendar.app AppleScript bridge lock on Exchange-backed calendars.** After a successful attendee-add, Calendar.app starts syncing the invite send to Exchange in the background, which locks the AppleScript bridge — subsequent attendee-add calls fail with `AppleEvent timed out (-1712)` until Calendar.app is restarted. `AttendeeManager` now detects `-1712` in osascript stderr and automatically performs a `quit` + `open -a Calendar` cycle with bridge-ready sleep, then retries the attendee-add once. Restores reliable batched-invite workflows without external Calendar.app management.
+
+### Added
+- New `AttendeeError.appleScriptTimeout(stderr:)` error variant for the case where auto-recovery also fails.
+
+---
+
+## [2.1.0] - 2026-05-29
+
+### Added
+- **Calendar invite attendees** on `create_event` and `update_event`. New optional `attendees` parameter accepts an array of `{email, name?}` objects. Because EventKit's `EKEvent.attendees` is read-only, this is implemented by shelling out to Calendar.app via AppleScript after the EventKit write succeeds. Calendar.app is auto-launched if needed.
+
+### Known Limitations
+- Invitation emails are only sent for calendars that support invites (iCloud, Exchange/CalDAV). Local-only calendars accept the attendee but no email is sent.
+- The AppleScript path requires Calendar.app to have synced the just-created event. In rare cases the event may not be visible to Calendar.app by UID immediately; in that case the EventKit write still succeeds and the response includes a clear warning.
+- For `update_event`, attendees are **appended**, not replaced.
+
+---
+
 ## [2.0.0] - 2026-03-27
 ### Fork: AppleRemindersMCP
 - Forked from che-ical-mcp v1.4.1 by Che Cheng
