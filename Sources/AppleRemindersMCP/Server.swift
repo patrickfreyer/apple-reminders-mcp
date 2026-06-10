@@ -233,6 +233,18 @@ class AppleRemindersMCPServer {
                                 "radius": .object(["type": .string("number"), "description": .string("Radius in meters (default 100)")])
                             ]),
                             "required": .array([.string("title")])
+                        ]),
+                        "attendees": .object([
+                            "type": .string("array"),
+                            "description": .string("Optional list of attendees to invite. EventKit cannot add attendees directly, so this is implemented by shelling out to Calendar.app via AppleScript after the event is created. Only works on calendars that support invites (iCloud, Exchange/CalDAV) — local-only calendars accept the attendee but no email is sent. Calendar.app will be auto-launched if not running."),
+                            "items": .object([
+                                "type": .string("object"),
+                                "properties": .object([
+                                    "email": .object(["type": .string("string"), "description": .string("Attendee email address (required)")]),
+                                    "name": .object(["type": .string("string"), "description": .string("Optional display name")])
+                                ]),
+                                "required": .array([.string("email")])
+                            ])
                         ])
                     ]),
                     "required": .array([.string("title"), .string("start_time"), .string("end_time"), .string("calendar_name")])
@@ -307,6 +319,18 @@ class AppleRemindersMCPServer {
                                 "radius": .object(["type": .string("number"), "description": .string("Radius in meters (default 100)")])
                             ]),
                             "required": .array([.string("title")])
+                        ]),
+                        "attendees": .object([
+                            "type": .string("array"),
+                            "description": .string("Optional list of attendees to add to the event. Implemented via Calendar.app AppleScript (EventKit attendees are read-only). Only works on calendars that support invites (iCloud, Exchange/CalDAV). Existing attendees are preserved — this APPENDS, it does not replace."),
+                            "items": .object([
+                                "type": .string("object"),
+                                "properties": .object([
+                                    "email": .object(["type": .string("string"), "description": .string("Attendee email address (required)")]),
+                                    "name": .object(["type": .string("string"), "description": .string("Optional display name")])
+                                ]),
+                                "required": .array([.string("email")])
+                            ])
                         ])
                     ]),
                     "required": .array([.string("event_id")])
@@ -1136,7 +1160,26 @@ class AppleRemindersMCPServer {
         if result.isDuplicate {
             return "Skipped (duplicate): \(result.event.title ?? title) already exists (ID: \(result.event.eventIdentifier ?? "unknown"))"
         }
-        return "Created event: \(result.event.title ?? title) (ID: \(result.event.eventIdentifier ?? "unknown"))"
+
+        // Add attendees via Calendar.app AppleScript (EventKit attendees are read-only).
+        var attendeeNote: String = ""
+        if let attendees = parseAttendees(from: arguments), let calName = calendarName {
+            let uid = result.event.calendarItemExternalIdentifier ?? result.event.calendarItemIdentifier
+            do {
+                try AttendeeManager.addAttendees(
+                    eventUID: uid,
+                    calendarName: calName,
+                    attendees: attendees,
+                    fallbackTitle: result.event.title ?? title,
+                    fallbackStartDate: result.event.startDate
+                )
+                attendeeNote = " (invited \(attendees.count) attendee\(attendees.count == 1 ? "" : "s"))"
+            } catch {
+                attendeeNote = " (WARNING: event created but adding attendees failed: \(error.localizedDescription))"
+            }
+        }
+
+        return "Created event: \(result.event.title ?? title) (ID: \(result.event.eventIdentifier ?? "unknown"))\(attendeeNote)"
     }
 
     private func handleUpdateEvent(arguments: [String: Value]) async throws -> String {
@@ -1180,7 +1223,27 @@ class AppleRemindersMCPServer {
             structuredLocation: structuredLocation
         )
 
-        return "Updated event: \(event.title ?? "")"
+        // Add attendees via Calendar.app AppleScript (EventKit attendees are read-only).
+        var attendeeNote: String = ""
+        if let attendees = parseAttendees(from: arguments) {
+            // Use the explicit calendar_name arg if provided, otherwise the event's own calendar.
+            let calName = calendarName ?? event.calendar.title
+            let uid = event.calendarItemExternalIdentifier ?? event.calendarItemIdentifier
+            do {
+                try AttendeeManager.addAttendees(
+                    eventUID: uid,
+                    calendarName: calName,
+                    attendees: attendees,
+                    fallbackTitle: event.title,
+                    fallbackStartDate: event.startDate
+                )
+                attendeeNote = " (added \(attendees.count) attendee\(attendees.count == 1 ? "" : "s"))"
+            } catch {
+                attendeeNote = " (WARNING: event updated but adding attendees failed: \(error.localizedDescription))"
+            }
+        }
+
+        return "Updated event: \(event.title ?? "")\(attendeeNote)"
     }
 
     private func handleDeleteEvent(arguments: [String: Value]) async throws -> String {
@@ -2514,6 +2577,21 @@ class AppleRemindersMCPServer {
             longitude: dict["longitude"]?.doubleValue,
             radius: dict["radius"]?.doubleValue
         )
+    }
+
+    /// Parse an optional `attendees` array from tool arguments.
+    /// Returns nil if the key is absent or the array is empty.
+    private func parseAttendees(from arguments: [String: Value]) -> [AttendeeInput]? {
+        guard let array = arguments["attendees"]?.arrayValue, !array.isEmpty else { return nil }
+        var result: [AttendeeInput] = []
+        for item in array {
+            guard let dict = item.objectValue else { continue }
+            guard let email = dict["email"]?.stringValue,
+                  !email.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+            let name = dict["name"]?.stringValue
+            result.append(AttendeeInput(email: email, name: name))
+        }
+        return result.isEmpty ? nil : result
     }
 
     private func parseLocationTrigger(from arguments: [String: Value]) throws -> LocationTriggerInput? {
