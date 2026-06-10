@@ -3,7 +3,7 @@ import Foundation
 /// Centralized version management
 enum AppVersion {
     /// Current version - update this when releasing
-    static let current = "2.1.1"
+    static let current = "2.1.2"
 
     /// App name
     static let name = "AppleRemindersMCP"

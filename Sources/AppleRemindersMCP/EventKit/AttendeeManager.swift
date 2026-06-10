@@ -40,9 +40,11 @@ enum AttendeeError: LocalizedError {
             """
         case .appleScriptTimeout(let stderr):
             return """
-            Calendar.app's AppleScript bridge timed out (-1712). This commonly happens when \
-            Calendar.app is mid-sync after a prior invite send (Exchange-backed calendars). \
-            Auto-recovery (restart Calendar.app + retry) was attempted and also failed. \
+            Calendar.app's AppleScript bridge is busy (-1712 timeout or -609 invalid connection). \
+            This commonly happens while Calendar.app is syncing an Exchange-backed account. \
+            Auto-recovery (waiting up to 2 minutes for the bridge to become responsive, then \
+            retrying) was attempted and also failed. Do NOT restart Calendar.app to recover — \
+            that re-triggers the Exchange sync that causes the lock. \
             Raw stderr: \(stderr.trimmingCharacters(in: .whitespacesAndNewlines))
             """
         }
@@ -89,14 +91,19 @@ struct AttendeeManager {
         )
 
         // First attempt — runs the full cache-lag retry loop. If the AppleScript bridge
-        // is locked (Calendar.app mid-sync after a previous invite send), this raises
-        // `appleScriptTimeout`; we restart Calendar.app once and retry the whole loop.
+        // is busy (Calendar.app mid-sync on an Exchange-backed account), this raises
+        // `appleScriptTimeout`. Recovery: wait for the bridge to answer a cheap query,
+        // then retry. Restarting Calendar.app here would be counterproductive — a fresh
+        // launch kicks off a full Exchange re-sync, which is exactly the state that
+        // blocks the bridge (sometimes for minutes).
         do {
             try runWithCacheLagRetry(script: script, eventUID: eventUID, calendarName: calendarName)
             return
         } catch AttendeeError.appleScriptTimeout {
-            restartCalendarApp()
-            // Single retry after restart — if this also fails, propagate.
+            guard waitForBridgeIdle(maxWait: 120) else {
+                throw AttendeeError.appleScriptTimeout(stderr: "bridge never became responsive within 120s")
+            }
+            // Single retry after the bridge recovered — if this also fails, propagate.
             try runWithCacheLagRetry(script: script, eventUID: eventUID, calendarName: calendarName)
         }
     }
@@ -184,7 +191,11 @@ struct AttendeeManager {
 
         // Note: `whose uid is "..."` is fast and avoids walking every event.
         // We wrap in a try so we can return a structured error if the UID is not found.
+        // The `with timeout` block caps each AppleEvent at 20s instead of the 2-minute
+        // default, so a busy bridge surfaces as a fast, recoverable -1712 rather than
+        // making the tool call appear to hang.
         return """
+        with timeout of 20 seconds
         tell application "Calendar"
             try
                 tell calendar "\(escapedCalendar)"
@@ -206,6 +217,7 @@ struct AttendeeManager {
                 end if
             end try
         end tell
+        end timeout
         """
     }
 
@@ -231,22 +243,69 @@ struct AttendeeManager {
         process.standardError = stderrPipe
 
         try process.run()
+
+        // Watchdog: the script's own `with timeout of 20 seconds` should make osascript
+        // exit on its own, but if the Apple Events connection itself wedges, osascript can
+        // block past that. Kill it after 45s so the MCP tool call never hangs indefinitely.
+        let watchdog = DispatchWorkItem {
+            if process.isRunning { process.terminate() }
+        }
+        DispatchQueue.global().asyncAfter(deadline: .now() + 45, execute: watchdog)
         process.waitUntilExit()
+        let wasKilledByWatchdog = watchdog.isCancelled == false && process.terminationReason == .uncaughtSignal
+        watchdog.cancel()
 
         let stderr = String(data: stderrPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+
+        if wasKilledByWatchdog {
+            throw AttendeeError.appleScriptTimeout(stderr: "osascript killed by 45s watchdog; stderr: \(stderr)")
+        }
 
         if process.terminationStatus != 0 {
             if stderr.contains("EVENT_NOT_FOUND_BY_UID") {
                 throw AttendeeError.eventNotFoundInCalendarApp(uid: eventUID, calendar: calendarName)
             }
-            // Detect AppleEvent timeout (-1712): Calendar.app's AppleScript bridge is locked,
-            // typically because it's mid-sync after a prior invite send. The caller can recover
-            // by restarting Calendar.app and retrying.
-            if stderr.contains("-1712") || stderr.contains("AppleEvent timed out") {
+            // Retryable bridge-busy states:
+            //   -1712 AppleEvent timed out — Calendar.app is mid-sync (Exchange accounts
+            //          block the bridge during sync, sometimes for minutes after launch).
+            //   -609  Connection is invalid — Calendar.app was quit/relaunched between
+            //          events; the next attempt gets a fresh connection.
+            if stderr.contains("-1712") || stderr.contains("AppleEvent timed out")
+                || stderr.contains("-609") || stderr.contains("Connection is invalid") {
                 throw AttendeeError.appleScriptTimeout(stderr: stderr)
             }
             throw AttendeeError.calendarAppFailed(stderr: stderr, status: process.terminationStatus)
         }
+    }
+
+    /// Poll Calendar.app with a cheap query until its AppleScript bridge answers, or the
+    /// deadline passes. Returns true once responsive. This is the correct recovery for a
+    /// busy bridge: the lock is caused by an in-flight account sync, so the only cure is
+    /// waiting it out. (Restarting Calendar.app re-triggers a full Exchange sync and makes
+    /// the lock WORSE — validated live on a large Exchange calendar, 2026-06-09.)
+    static func waitForBridgeIdle(maxWait: TimeInterval) -> Bool {
+        let probe = """
+        with timeout of 10 seconds
+        tell application "Calendar" to get name of first calendar
+        end timeout
+        """
+        let deadline = Date().addingTimeInterval(maxWait)
+        while Date() < deadline {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+            process.arguments = ["-e", probe]
+            process.standardOutput = Pipe()
+            process.standardError = Pipe()
+            do {
+                try process.run()
+                process.waitUntilExit()
+                if process.terminationStatus == 0 { return true }
+            } catch {
+                // osascript itself failed to launch — treat as not ready and keep polling.
+            }
+            Thread.sleep(forTimeInterval: 5.0)
+        }
+        return false
     }
 
     /// Launch Calendar.app if it is not already running. We don't bring it to the foreground.
@@ -271,33 +330,4 @@ struct AttendeeManager {
         }
     }
 
-    /// Quit and relaunch Calendar.app. Used when the AppleScript bridge is locked
-    /// (typically because Calendar.app is mid-sync after a previous invite send to an
-    /// Exchange-backed calendar). After a fresh launch the bridge accepts attendee writes again.
-    /// Total cost: ~10s of sleep — only invoked after a -1712 timeout, so it's not on the hot path.
-    private static func restartCalendarApp() {
-        // Quit
-        let quitProcess = Process()
-        quitProcess.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        quitProcess.arguments = ["-e", "tell application \"Calendar\" to quit"]
-        quitProcess.standardOutput = Pipe()
-        quitProcess.standardError = Pipe()
-        try? quitProcess.run()
-        quitProcess.waitUntilExit()
-
-        // Wait for Calendar.app to fully exit before relaunching.
-        Thread.sleep(forTimeInterval: 4.0)
-
-        // Relaunch via `open -a` (doesn't require it to be in the foreground).
-        let openProcess = Process()
-        openProcess.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        openProcess.arguments = ["-a", "Calendar"]
-        openProcess.standardOutput = Pipe()
-        openProcess.standardError = Pipe()
-        try? openProcess.run()
-        openProcess.waitUntilExit()
-
-        // Wait for Calendar.app to be ready to accept AppleScript again.
-        Thread.sleep(forTimeInterval: 6.0)
-    }
 }

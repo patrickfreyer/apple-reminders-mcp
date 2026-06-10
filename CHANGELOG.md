@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-06-09
+
+### Fixed
+- **Bridge-busy recovery no longer restarts Calendar.app.** The 2.1.1 recovery (quit + relaunch Calendar.app on `-1712`) was counterproductive on Exchange-backed accounts: a fresh launch triggers a full account re-sync, which is exactly the state that blocks the AppleScript bridge — sometimes for minutes. Recovery now polls a cheap query (`get name of first calendar`, 10s timeout, every 5s for up to 2 minutes) and retries the attendee-add once the bridge answers. Validated live on a large BCG Exchange calendar where the restart-based recovery deadlocked twice and the poll-based recovery succeeded in ~40s.
+- **Attendee-add can no longer hang the MCP tool call.** The generated AppleScript is wrapped in `with timeout of 20 seconds` (was: the 2-minute AppleEvent default), and a 45-second process-level watchdog terminates a wedged `osascript`. Busy-bridge failures now surface fast and recoverable instead of appearing as a frozen tool call (the cache-lag retry loop could previously stack 6 × 2-minute waits, twice).
+- **`-609` "Connection is invalid" treated as retryable.** Occurs when Calendar.app was quit/relaunched between Apple Events; the next attempt on a fresh connection succeeds.
+
+### Changed
+- Bumped `modelcontextprotocol/swift-sdk` 0.11.0 → 0.12.1 (0.11.0 no longer compiles under Swift 6.3.2's stricter concurrency diagnostics).
+
+---
+
 ## [2.1.1] - 2026-05-30
 
 ### Fixed
